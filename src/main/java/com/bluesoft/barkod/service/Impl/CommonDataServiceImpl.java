@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import com.bluesoft.barkod.entity.AkisProgress;
 import com.bluesoft.barkod.entity.TblSanalBarkod;
 import com.bluesoft.barkod.model.ActionResponse;
 import com.bluesoft.barkod.model.CommonActionRequest;
+import com.bluesoft.barkod.model.GrafikOutputData;
 import com.bluesoft.barkod.model.MobilActionRequest;
 import com.bluesoft.barkod.model.MobilActionResponse;
 import com.bluesoft.barkod.model.SanalBarkodResponse;
@@ -188,12 +190,25 @@ public class CommonDataServiceImpl implements CommonDataService {
 	
 	public static BigDecimal percentage(BigDecimal base, BigDecimal pct){
 		if(BigDecimal.ZERO.compareTo(base)==0) return BigDecimal.ZERO;
-	    return base.divide(pct, 2, RoundingMode.HALF_EVEN).multiply(new BigDecimal(100));
+	    return base.divide(pct, 2, RoundingMode.HALF_UP).multiply(new BigDecimal(100));
 	}
 
 	@Override
 	public SanalBarkodResponse getSanalBarkodDetay(Long sanalBarkodNo) {
 		return commonDataRepository.getSanalBarkodDetay(sanalBarkodNo);
+	}
+
+	@Override
+	public List<GrafikOutputData> getGrafikData(Long depoId, Long projeId,Long projectDevreId) {
+		 List<GrafikOutputData> dataList = commonDataRepository.getGrafikData(depoId,projeId,projectDevreId);
+		 
+		 BigDecimal totalAgirlik = dataList.stream().map(x -> x.getIslemSayilari()).reduce(BigDecimal.ZERO, BigDecimal::add); 
+	
+		for (GrafikOutputData grafikOutputData : dataList) {
+			grafikOutputData.setPercent(percentage(grafikOutputData.getIslemSayilari(),totalAgirlik).setScale(2));
+		}
+		 
+		return dataList;
 	}
 
 }

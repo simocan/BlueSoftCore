@@ -6,6 +6,7 @@ import com.bluesoft.barkod.entity.AkisHavuz;
 import com.bluesoft.barkod.model.ActionResponse;
 import com.bluesoft.barkod.model.CalculatedDataDTO;
 import com.bluesoft.barkod.model.CommonActionRequest;
+import com.bluesoft.barkod.model.GrafikOutputData;
 import com.bluesoft.barkod.model.MobilActionRequest;
 import com.bluesoft.barkod.model.MobilActionResponse;
 import com.bluesoft.barkod.model.SanalBarkodResponse;
@@ -24,5 +25,7 @@ public interface CommonDataService {
 	public CalculatedDataDTO calculateData(Long depoId, Long projeId,Long projectDevreId,Long priorty);
 	
 	public SanalBarkodResponse getSanalBarkodDetay(Long sanalBarkodNo);
+	
+	public List<GrafikOutputData> getGrafikData(Long depoId, Long projeId,Long projectDevreId);
 
 }

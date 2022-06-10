@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
 import com.bluesoft.barkod.entity.AkisHavuz;
+import com.bluesoft.barkod.model.GrafikOutputData;
 import com.bluesoft.barkod.model.SanalBarkodResponse;
 import com.bluesoft.barkod.model.commonDataDTO;
 import com.bluesoft.barkod.repository.CommonDataRepository;
@@ -55,6 +56,12 @@ public class CommonDataRepositoryImpl implements CommonDataRepository {
 			+ " LEFT JOIN TBL_FATURALAR FATURA ON FATURA.ID=SANAL.FATURAID "
 			+ " LEFT JOIN TBL_PROJEDEVRELER TP ON TP.ID=FATURA.PROJEDEVREID "
 			+ " LEFT JOIN TBL_PROJELER PROJE ON PROJE.ID=FATURA.PROJEID WHERE SANAL.SANALBARKOD=?1 ";
+	
+	private String SELECT_GRAFIK_DATA = "SELECT  COUNT(SDK.HAVUZ) AS ISLEMDURUMLARI, SDK.HAVUZ, TB.PROJEID, TP.ADI AS PROJEADI, TT.ID AS TERSANEID "
+		+ " FROM  dbo.TBL_SANALBARKOD AS SDK INNER JOIN dbo.TBL_FATURALAR AS TB ON TB.ID = SDK.FATURAID LEFT OUTER JOIN "
+	    + " dbo.TBL_PROJELER AS TP ON TP.ID = TB.PROJEID LEFT OUTER JOIN dbo.DEPO AS D ON D.ID = TB.DEPOID LEFT OUTER JOIN "
+	    + " dbo.TBL_TERSANELER AS TT ON TT.ID = D.TERSANEID LEFT JOIN TBL_PROJEDEVRELER TPJ ON TPJ.ID=TB.PROJEDEVREID "
+	    + " WHERE tb.PROJEID=?1 AND TPJ.ID=ISNULL(?2,TPJ.ID) GROUP BY SDK.HAVUZ, TB.PROJEID, TP.ADI, TT.ID ";
 			
 
 	@Transactional
@@ -152,6 +159,28 @@ public class CommonDataRepositoryImpl implements CommonDataRepository {
 		}
 
 		return response;
+	}
+	
+
+	@Override
+	public List<GrafikOutputData>  getGrafikData(Long depoId,Long projeId,Long projecDevreId) {
+		
+		List<GrafikOutputData> responseList = new ArrayList<GrafikOutputData>();
+		
+		Query q = entityManager.createNativeQuery(SELECT_GRAFIK_DATA, Tuple.class);
+		q.setParameter(1, projeId);
+		q.setParameter(2, projecDevreId);
+		
+		List<Tuple> resultList = q.getResultList();
+
+		for (Tuple tuple : resultList) {
+			GrafikOutputData output=new GrafikOutputData();
+			output.setIslemSayilari(new BigDecimal(tuple.get("ISLEMDURUMLARI").toString()));
+			output.setHavuz(tuple.get("HAVUZ").toString());
+			responseList.add(output);
+		}
+		
+		return responseList;
 	}
 
 }

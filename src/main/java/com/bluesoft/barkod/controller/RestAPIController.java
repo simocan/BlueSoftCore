@@ -79,6 +79,11 @@ public class RestAPIController {
 	public ResponseEntity<?> getSanalBarkodDetay(@PathVariable Long sanalBarkodNo) {
 		return ResponseEntity.ok(commonDataService.getSanalBarkodDetay(sanalBarkodNo));
 	}
+	
+	@PostMapping("/{depoId}/calculateGraph")
+	public ResponseEntity<?> calculateGraph(@PathVariable Long depoId, @RequestBody CalculateDataRequest project) {
+		return ResponseEntity.ok(commonDataService.getGrafikData(depoId, project.getProjectId(),project.getProjectDevreId()));
+	}
 
 	
 }
